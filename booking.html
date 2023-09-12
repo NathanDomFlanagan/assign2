@@ -1,0 +1,96 @@
+<!-- 
+  Student Information:
+  Name: Nathan Flanagan
+  ID: 20122140
+
+  File: booking.html
+
+  Description:
+  This HTML file represents a web page for taxi booking. It contains a form to capture customer information and booking details.
+  
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CabsOnline - Taxi Booking</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Prepopulate pick-up date with current date
+        var currentDate = new Date().toISOString().split("T")[0];
+        $("input[name='date']").val(currentDate);
+
+        // Prepopulate pick-up time with current time
+        var currentTime = new Date();
+        var hours = currentTime.getHours().toString().padStart(2, "0");
+        var minutes = currentTime.getMinutes().toString().padStart(2, "0");
+        var initialTimeValue = hours + ":" + minutes;
+        $("input[name='time']").val(initialTimeValue);
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Taxi Booking</h1>
+    <form id="bookingForm">
+      <label for="cname">Customer Name:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+      <input type="text" name="cname" required />
+      <br /><br />
+
+      <label for="phone"
+        >Phone Number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label
+      >
+      <input type="text" name="phone" required />
+      <br /><br />
+
+      <label for="unumber"
+        >Unit
+        Number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label
+      >
+      <input type="text" name="unumber" />
+      <br /><br />
+
+      <label for="snumber"
+        >Street Number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label
+      >
+      <input type="text" name="snumber" required />
+      <br /><br />
+
+      <label for="stname"
+        >Street
+        Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label
+      >
+      <input type="text" name="stname" required />
+      <br /><br />
+
+      <label for="sbname"
+        >Suburb:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label
+      >
+      <input type="text" name="sbname" />
+      <br /><br />
+
+      <label for="dsbname">Destination Suburb:</label>
+      <input type="text" name="dsbname" />
+      <br /><br />
+
+      <label for="date"
+        >Pick-Up
+        Date:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label
+      >
+      <input type="date" name="date" required />
+      <br /><br />
+
+      <label for="time"
+        >Pick-Up Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label
+      >
+      <input type="time" name="time" required />
+      <br /><br />
+
+      <input type="submit" value="Book Now" />
+    </form>
+
+    <div id="confirmation"></div>
+
+    <script src="booking.js"></script>
+  </body>
+</html>

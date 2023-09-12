@@ -1,0 +1,48 @@
+CREATE TABLE bookings (
+  booking_id INT AUTO_INCREMENT PRIMARY KEY,
+  booking_number VARCHAR(10) NOT NULL,
+  customer_name VARCHAR(50) NOT NULL,
+  phone_number VARCHAR(12) NOT NULL,
+  unit_number VARCHAR(10),
+  street_number VARCHAR(10) NOT NULL,
+  street_name VARCHAR(50) NOT NULL,
+  suburb VARCHAR(50),
+  destination_suburb VARCHAR(50),
+  pickup_date DATE NOT NULL,
+  pickup_time TIME NOT NULL,
+  assignment_status VARCHAR(20) NOT NULL,
+  booking_datetime DATETIME NOT NULL
+);
+
+$sql = "INSERT INTO bookings (booking_number, customer_name, phone_number, unit_number, street_number, street_name, suburb, destination_suburb, pickup_date, pickup_time, assignment_status, booking_datetime)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ssssssssssss", $bookingNumber, $cname, $phone, $unumber, $snumber, $stname, $sbname, $dsbname, $date, $time, $assignmentStatus, $bookingDateTime);
+
+
+$sql = "SELECT MAX(booking_id) AS max_booking_id FROM bookings";
+
+if (empty($referenceNumber)) {
+  // If reference number is empty, fetch unassigned bookings within 2 hours from the current time
+  $sql = "SELECT * FROM bookings WHERE pickup_date = CURDATE() AND pickup_time <= CURTIME() + INTERVAL 2 HOUR";
+} else {
+  // If reference number is provided, fetch the booking with the matching reference number
+  $sql = "SELECT * FROM bookings WHERE booking_number = '$referenceNumber'";
+}
+
+// Create a new database connection
+$conn = new mysqli($host, $user, $password, $dbname);
+
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
+}
+
+$sql = "UPDATE bookings SET assignment_status = 'assigned' WHERE booking_number = '$bookingNumber'";
+
+if ($conn->query($sql) === TRUE) {
+  // Return a confirmation message
+  echo json_encode(["message" => "Congratulations! Booking request " . $bookingNumber . " has been assigned!"]);
+} else {
+  echo json_encode(["message" => "Error updating record: " . $conn->error]);
+}

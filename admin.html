@@ -1,0 +1,189 @@
+<!-- 
+  Student Information:
+  Name: Nathan Flanagan
+  ID: 20122140
+
+  File: admin.html
+
+  Description:
+  This file represents the Admin Panel for CabsOnline. It provides a user interface for searching and managing booking requests.
+
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin Panel - CabsOnline</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Admin Panel - CabsOnline</h1>
+    <div class="content">
+      <h2>Booking Request Search</h2>
+      <form id="bookingSearchForm">
+        <!-- Input form for searching bookings -->
+        <label for="referenceNumber">Reference Number:</label>
+        <input type="text" id="referenceNumber" name="referenceNumber" />
+        <input type="submit" value="Search" />
+      </form>
+      <br />
+      <h2>Search Results</h2>
+      <p id="confirmation"></p>
+      <table id="bookingTable">
+        <thead>
+          <!-- Table headers for booking information -->
+          <tr>
+            <th>Booking Reference Number</th>
+            <th>Customer Name</th>
+            <th>Phone</th>
+            <th>Pickup Suburb</th>
+            <th>Destination Suburb</th>
+            <th>Pickup Date and Time</th>
+            <th>Status</th>
+            <th>Assign</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <script>
+      // Event listener for form submission
+      document
+        .getElementById("bookingSearchForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          var referenceNumber = document
+            .getElementById("referenceNumber")
+            .value.trim();
+
+          if (validateReferenceNumber(referenceNumber)) {
+            searchBooking(referenceNumber);
+          } else {
+            alert("Invalid reference number format!");
+          }
+        });
+
+      // Function to validate the reference number format
+      function validateReferenceNumber(referenceNumber) {
+        // Regex pattern for valid reference number format: BRN followed by 5 digits
+        var pattern = /^BRN\d{5}$/;
+        return pattern.test(referenceNumber) || referenceNumber === "";
+      }
+
+      // Function to search bookings based on reference number
+      function searchBooking(referenceNumber) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              var bookings = JSON.parse(xhr.responseText);
+              displayBookings(bookings);
+            } else {
+              console.log("Error: " + xhr.status);
+            }
+          }
+        };
+
+        xhr.open("POST", "search_booking.php", true);
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+        xhr.send("referenceNumber=" + encodeURIComponent(referenceNumber));
+      }
+
+      // Function to display the search results/ bookings in the table
+      function displayBookings(bookings) {
+        var tableBody = document
+          .getElementById("bookingTable")
+          .getElementsByTagName("tbody")[0];
+        tableBody.innerHTML = "";
+
+        var now = new Date(); // Current date and time
+
+        for (var i = 0; i < bookings.length; i++) {
+          var booking = bookings[i];
+          var pickupDateTime = new Date(
+            booking.pickup_date + " " + booking.pickup_time
+          );
+
+          // Check if the booking is within the next two hours
+          if (
+            pickupDateTime > now &&
+            pickupDateTime - now <= 2 * 60 * 60 * 1000
+          ) {
+            var row = document.createElement("tr");
+
+            row.innerHTML = `
+              <td>${booking.booking_number}</td>
+              <td>${booking.customer_name}</td>
+              <td>${booking.phone_number}</td>
+              <td>${booking.pickup_suburb}</td>
+              <td>${booking.destination_suburb}</td>
+              <td>${booking.pickup_date} ${booking.pickup_time}</td>
+              <td>${booking.status}</td>
+              <td>
+                ${
+                  booking.status === "unassigned"
+                    ? `<button onclick="assignBooking('${booking.booking_number}')">Assign</button>`
+                    : ""
+                }
+              </td>
+            `;
+
+            tableBody.appendChild(row);
+          }
+        }
+      }
+
+      // Function to assign a booking to a driver
+      function assignBooking(bookingNumber) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              var confirmation = JSON.parse(xhr.responseText);
+              displayConfirmation(confirmation);
+              searchBooking(
+                document.getElementById("referenceNumber").value.trim()
+              ); // Pass the referenceNumber parameter
+              // Refresh the table after assigning the booking
+            } else {
+              console.log("Error: " + xhr.status);
+            }
+          }
+        };
+
+        xhr.open("POST", "assign_booking.php", true);
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+        xhr.send("bookingNumber=" + encodeURIComponent(bookingNumber));
+      }
+
+      // Function to display a confirmation message
+      function displayConfirmation(confirmation) {
+        var confirmationParagraph = document.getElementById("confirmation");
+        confirmationParagraph.textContent = confirmation.message;
+      }
+    </script>
+  </body>
+</html>
